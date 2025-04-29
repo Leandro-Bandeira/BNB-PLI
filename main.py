@@ -78,6 +78,7 @@ def solve_relax_problem(problem: Problem):
     model = gp.Model("Branch-And-Bound")
     model.setParam('OutputFlag', 0)
     # add variables
+    #x = model.addVars(count_vars, vtype=GRB.BINARY, name='x')
     x = model.addVars(count_vars, lb = 0, ub=1, vtype=GRB.CONTINUOUS, name='x')
 
     # Define a função objetivo #
@@ -202,7 +203,7 @@ def bnb(root: Node):
 
                     
 if __name__=="__main__":
-    path_instance = "teste4.txt"
+    path_instance = "teste0.txt"
 
     count_vars, count_constr, coef_obj, coef_constr = read_instance(path_instance)
 
