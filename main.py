@@ -40,9 +40,10 @@ def read_instance(path: str):
         lines = file.readlines()
         for i, line in enumerate(lines):
             if i == 0:
-                count_vars, count_constr = map(float, line.split())
+                count_vars, count_constr = map(int, line.split())
             elif i == 1:
-                coef_obj = list(map(float, line.split()))
+                coef_obj = map(float, line.split())
+                coef_obj = list(coef_obj)
             else:
                 coef_constr.append(list(map(float, line.split())))
 
@@ -202,8 +203,8 @@ def bnb(root: Node):
                     
 if __name__=="__main__":
 
-    if len(sys.argv) < 1:  #user não colocou o arquivo
-        print("Uso: python main.py nomedoarquivo.txt")
+    if len(sys.argv) < 2:  #user não colocou o arquivo
+        print("Para executar: python main.py nomedoarquivo.txt")
         sys.exit(1)
 
     path_instance = sys.argv[1]
