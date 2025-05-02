@@ -1,6 +1,7 @@
 import gurobipy as gp
 from gurobipy import GRB
 import math
+import sys
 
 
 ## Classe responsável por armazenar a solução dual/primal final ##
@@ -35,17 +36,15 @@ def read_instance(path: str):
     coef_obj = []
     coef_constr = []
     
-    with open(path, 'r') as file:
+    with open(path, 'r') as file:        #lendo as linhas como strings e fazendo a conversao pra int
         lines = file.readlines()
         for i, line in enumerate(lines):
             if i == 0:
-                count_vars, count_constr = map(int, line.split())
+                count_vars, count_constr = map(float, line.split())
             elif i == 1:
-                coef_obj = list(map(int, line.split()))
+                coef_obj = list(map(float, line.split()))
             else:
-                coef_constr.append(list(map(int, line.split())))
-
-                
+                coef_constr.append(list(map(float, line.split())))
 
     return(
         count_vars,
@@ -54,8 +53,7 @@ def read_instance(path: str):
         coef_constr
     )
 
-# Verifica se o modelo relaxado é viável para o problema original
-# Se todas as variáveis são zero ou um.
+# Verifica se o modelo relaxado é viável para o problema original: se todas as variáveis são zero ou um.
 def is_feasible(model):
     tolerance = 1e-6
     for var in model.getVars():
@@ -91,17 +89,18 @@ def solve_relax_problem(problem: Problem):
 
     # Define as restrições originais #
     for i in range(count_constr):
-        size_constr = len(coef_constr[i])
+        size_constr = len(coef_constr[i]) #pega a qtd de coeficientes de uma restricao
         model.addConstr(
             gp.quicksum(
                 x[j] * coef_constr[i][j] for j in range(size_constr - 1)
-            ) <= coef_constr[i][size_constr - 1]
+            ) <= coef_constr[i][size_constr - 1] #a soma das primeiras variáves é <= ultima variavel
         )
 
     # Define novas restrições #
     if new_constr:
         for (var_idx, val) in new_constr:
             model.addConstr(x[var_idx] == val)
+
     model.optimize()
     return model
 
@@ -171,8 +170,7 @@ def bnb(root: Node):
         
         solution.z_dual = max([obj_val_a, obj_val_b]) 
 
-        # Poda por limite, ou seja, se o valores de node a ou node b nao foram podados por inviabilidade
-        # Mas se ocorrer da sua FO ser menor que o primal conhecido, podamos por limite
+        # Se ocorrer da sua FO ser menor que o primal conhecido, podamos por limite
         if obj_val_a >= 0 and node_a.model.objVal <= solution.z_primal:
             node_a = None
         if obj_val_b >= 0 and node_b.model.objVal <= solution.z_primal:
@@ -203,7 +201,12 @@ def bnb(root: Node):
 
                     
 if __name__=="__main__":
-    path_instance = "teste0.txt"
+
+    if len(sys.argv) < 1:  #user não colocou o arquivo
+        print("Uso: python main.py nomedoarquivo.txt")
+        sys.exit(1)
+
+    path_instance = sys.argv[1]
 
     count_vars, count_constr, coef_obj, coef_constr = read_instance(path_instance)
 
